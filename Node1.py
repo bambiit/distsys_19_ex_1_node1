@@ -1,11 +1,27 @@
 import socket
 import threading
-from multiprocessing.pool import ThreadPool
 
+from threading import Thread
+
+## class for getting return values of functions each thread runs
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args,
+                                        **self._kwargs)
+    ##by running this join function, return value of the target function can be obtained.
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
 
 
 
 def deal_with_customer(client_socket, addr):
+
 
     print('Connection created with :', addr[0], ':', addr[1])
     print('Waiting request from the client.')
@@ -16,44 +32,55 @@ def deal_with_customer(client_socket, addr):
     name = info_customer.split(", ")[0]
     bank_account = info_customer.split(", ")[1]
 
-    pool = ThreadPool(processes=1)
 
     if (len(str(bank_account)) == 18):
-        async_thread1_result = pool.apply_async(call_node2, (name, bank_account))
-        async_thread2_result = pool.apply_async(call_node3, (name, bank_account))
 
-        print("Node1 called other two nodes.")
+        thread1 = ThreadWithReturnValue(target=call_node2, args=(name, bank_account, price, ))
+        thread2 = ThreadWithReturnValue(target=call_node3, args=(bank_account,))
 
-        if(async_thread1_result.get() == 'OK'):
-            if(async_thread1_result.get() == 'OK'):
+        thread1.start()
+        thread2.start()
+
+        result1 = thread1.join()
+        result2 = thread2.join()
+
+        if (result1 == 'OK'):
+            if (result2 == 'OK'):
+                print("Payment succeeded and send the result to the cleint <" + addr[0] + ':' + addr[1] + ">")
                 client_socket.send("OK".encode())
             else:
-                client_socket.send(async_thread2_result.get())
+                print("The client couldn't succeed to pay with this reason : " + result2)
+                client_socket.send(str(result2).encode())
         else:
-            client_socket.send(async_thread2_result.get())
+            print("The client couldn't succeed to pay with this reason : " + result1)
+            client_socket.send(str(result1).encode())
+
+
     else:
-        print("Wrong bank account number")
-        client_socket.send("Wrong bank account number".encode())
+        print("The client couldn't succeed to pay with this reason : WRONG BANK ACCOUNT NUMBER")
+        client_socket.send("WRONG BANK ACCOUNT NUMBER".encode())
 
 
 
-def call_node2(name, bankaccount):
+def call_node2(name, bankaccount, amount):
     sock_for_N2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock_for_N2.connect(("localhost", 8002))
     print("Node 2 connected")
-
-    sock_for_N2.send()
+    sock_for_N2.send(str(name+", "+bankaccount+", "+amount).encode())
+    print("Info sent to Node 2")
+    
     return sock_for_N2.recv(1024).decode()
 
 
 
 
-def call_node3(name, bankaccount):
+def call_node3(bankaccount):
     sock_for_N3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock_for_N3.connect(("localhost", 8003))
     print("Node 3 connected")
-
     sock_for_N3.send(bytes(bankaccount, "utf-8"))
+    print("Info sent to Node 3")
+
     return sock_for_N3.recv(1024).decode()
 
 
