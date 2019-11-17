@@ -4,7 +4,7 @@ import threading
 from threading import Thread
 
 ## class for getting return values of functions each thread runs
-class ThreadWithReturnValue(Thread):
+class thread_rv(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
         Thread.__init__(self, group, target, name, args, kwargs)
         self._return = None
@@ -13,6 +13,7 @@ class ThreadWithReturnValue(Thread):
         if self._target is not None:
             self._return = self._target(*self._args,
                                         **self._kwargs)
+
     ##by running this join function, return value of the target function can be obtained.
     def join(self, *args):
         Thread.join(self, *args)
@@ -35,8 +36,8 @@ def deal_with_customer(client_socket, addr):
 
     if (len(str(bank_account)) == 18):
 
-        thread1 = ThreadWithReturnValue(target=call_node2, args=(name, bank_account, price, ))
-        thread2 = ThreadWithReturnValue(target=call_node3, args=(bank_account,))
+        thread1 = thread_rv(target=call_node2, args=(name, bank_account, price, ))
+        thread2 = thread_rv(target=call_node3, args=(bank_account,))
 
         thread1.start()
         thread2.start()
@@ -68,7 +69,7 @@ def call_node2(name, bankaccount, amount):
     print("Node 2 connected")
     sock_for_N2.send(str(name+", "+bankaccount+", "+amount).encode())
     print("Info sent to Node 2")
-    
+
     return sock_for_N2.recv(1024).decode()
 
 
