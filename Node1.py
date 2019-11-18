@@ -4,7 +4,7 @@ from _datetime import datetime
 
 from threading import Thread
 
-## class for getting return values of functions each thread runs
+#Class for getting return values of functions each thread runs.
 class thread_rv(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
         Thread.__init__(self, group, target, name, args, kwargs)
@@ -22,7 +22,7 @@ class thread_rv(Thread):
 
 
 #This function deals with the customer request.
-# It is run in a thread created at the most bottom code.
+#It is run in a thread created at the most bottom code.
 def deal_with_customer(client_socket, addr):
 
     time = str(datetime.now())+"\n"
@@ -31,9 +31,8 @@ def deal_with_customer(client_socket, addr):
     #log_file.write(time+message)
 
 
-    #receive data from socket with
+    #receives data(price) from the socket connected with the client.
     price = client_socket.recv(4).decode()
-
 
 
     time = str(datetime.now())+"\n"
@@ -42,7 +41,7 @@ def deal_with_customer(client_socket, addr):
     #log_file.write(time+message)
 
 
-
+    #receives data(customer info) from the socket connected with the client.
     info_customer = client_socket.recv(1024).decode()
 
     name = info_customer.split(", ")[0]
@@ -57,15 +56,19 @@ def deal_with_customer(client_socket, addr):
 
     if (len(str(bank_account)) == 18):
 
+        #creates threads which call Node2 and Node3.
         thread1 = thread_rv(target=call_node2, args=(name, bank_account, price, ))
         thread2 = thread_rv(target=call_node3, args=(bank_account,))
 
         thread1.start()
         thread2.start()
 
+        #Synchronization of threads. waits until both threads end.
         result1 = thread1.join()
         result2 = thread2.join()
 
+
+        #sends the result to the client.
         if (result1 == 'OK'):
             if (result2 == 'OK'):
                 client_socket.send("OK".encode())
@@ -92,8 +95,7 @@ def deal_with_customer(client_socket, addr):
             print(time + message)
             #log_file.write(time + message)
 
-
-
+    #sends the result to the client.
     else:
         client_socket.send("WRONG BANK ACCOUNT NUMBER".encode())
 
@@ -103,9 +105,10 @@ def deal_with_customer(client_socket, addr):
         #log_file.write(time + message)
 
 
-
+#Communication with the Node2
 def call_node2(name, bankaccount, amount):
     try:
+        #connects with the Node2.
         sock_for_N2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock_for_N2.connect(("localhost", 8002))
 
@@ -115,6 +118,7 @@ def call_node2(name, bankaccount, amount):
         #log_file.write(time + message)
 
 
+        #forwards requests to the Node2.
         sock_for_N2.send(str(bankaccount+"\n"+amount+name+"\n").encode())
 
         time = str(datetime.now()) + "\n"
@@ -135,10 +139,10 @@ def call_node2(name, bankaccount, amount):
 
         return message
 
-
-
+#Communication with the Node3
 def call_node3(bankaccount):
     try:
+        #connects with the Node3.
         sock_for_N3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock_for_N3.connect(("localhost", 8003))
 
@@ -148,6 +152,7 @@ def call_node3(bankaccount):
         #log_file.write(time + message)
 
 
+        #forwards requests to the Node3.
         sock_for_N3.send(str(bankaccount).encode())
 
         time = str(datetime.now()) + "\n"
@@ -170,7 +175,7 @@ def call_node3(bankaccount):
 
 
 
-
+#creates a socket for connecting with clients.
 socket_for_clients = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_for_clients.bind(("localhost", 8001))
 socket_for_clients.listen()
@@ -183,6 +188,7 @@ print(time + message)
 #log_file.write(time + message)
 
 
+#receives multiple clients with multithreads.
 while True:
     client_socket, addr = socket_for_clients.accept()
     threading.Thread(target=deal_with_customer, args=(client_socket, addr)).start()
