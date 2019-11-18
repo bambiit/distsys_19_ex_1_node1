@@ -72,7 +72,6 @@ def deal_with_customer(client_socket, addr):
         if (result1 == 'OK'):
             if (result2 == 'OK'):
                 client_socket.send("OK".encode())
-
                 time = str(datetime.now()) + "\n"
                 message = "Payment succeeded and send the result to the cleint <" + str(addr[0]) + ':' + str(addr[1]) + ">\n"
                 print(time + message)
@@ -81,7 +80,6 @@ def deal_with_customer(client_socket, addr):
 
             else:
                 client_socket.send(str(result2).encode())
-
                 time = str(datetime.now()) + "\n"
                 message = "The client couldn't succeed to pay with this reason : " + str(result2) +"\n"
                 print(time + message)
@@ -89,7 +87,6 @@ def deal_with_customer(client_socket, addr):
 
         else:
             client_socket.send(str(result1).encode())
-
             time = str(datetime.now()) + "\n"
             message = "The client couldn't succeed to pay with this reason : " + str(result1) + "\n"
             print(time + message)
@@ -119,7 +116,7 @@ def call_node2(name, bankaccount, amount):
 
 
         #forwards requests to the Node2.
-        sock_for_N2.send(str(bankaccount+"\n"+amount+name+"\n").encode())
+        sock_for_N2.send(str(bankaccount+"\n"+amount+"\n"+name).encode())
 
         time = str(datetime.now()) + "\n"
         message = "Info sent to Node 2\n"
