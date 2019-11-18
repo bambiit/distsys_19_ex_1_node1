@@ -15,13 +15,14 @@ class thread_rv(Thread):
             self._return = self._target(*self._args,
                                         **self._kwargs)
 
-    ##by running this join function, return value of the target function can be obtained.
+    ##by running this join function, return value of the target function in thread can be obtained.
     def join(self, *args):
         Thread.join(self, *args)
         return self._return
 
 
-
+#This function deals with the customer request.
+# It is run in a thread created at the most bottom code.
 def deal_with_customer(client_socket, addr):
 
     time = str(datetime.now())+"\n"
@@ -30,7 +31,7 @@ def deal_with_customer(client_socket, addr):
     #log_file.write(time+message)
 
 
-
+    #receive data from socket with
     price = client_socket.recv(4).decode()
 
 
@@ -103,8 +104,6 @@ def deal_with_customer(client_socket, addr):
 
 
 
-
-
 def call_node2(name, bankaccount, amount):
     try:
         sock_for_N2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -116,7 +115,7 @@ def call_node2(name, bankaccount, amount):
         #log_file.write(time + message)
 
 
-        sock_for_N2.send(str(name+"\n"+bankaccount+"\n"+amount).encode())
+        sock_for_N2.send(str(bankaccount+"\n"+amount+name+"\n").encode())
 
         time = str(datetime.now()) + "\n"
         message = "Info sent to Node 2\n"
@@ -135,7 +134,6 @@ def call_node2(name, bankaccount, amount):
         #log_file.write(time + message)
 
         return message
-
 
 
 
@@ -169,8 +167,6 @@ def call_node3(bankaccount):
         #log_file.write(time + message)
 
         return message
-
-
 
 
 
