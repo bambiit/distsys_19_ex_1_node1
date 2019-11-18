@@ -116,7 +116,7 @@ def call_node2(name, bankaccount, amount):
         #log_file.write(time + message)
 
 
-        sock_for_N2.send(str(name+", "+bankaccount+", "+amount).encode())
+        sock_for_N2.send(str(name+"\n"+bankaccount+"\n"+amount).encode())
 
         time = str(datetime.now()) + "\n"
         message = "Info sent to Node 2\n"
