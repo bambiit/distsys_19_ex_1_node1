@@ -29,7 +29,6 @@ def deal_with_customer(client_socket, addr):
     time = str(datetime.now())+"\n"
     message = 'Connection created with ' + str(addr[0]) + ' : ' + str(addr[1])+"\n"
     print(time+message)
-    #log_file.write(time+message)
 
 
     #receives data(price) from the socket connected with the client.
@@ -39,7 +38,6 @@ def deal_with_customer(client_socket, addr):
     time = str(datetime.now())+"\n"
     message = 'received data(price) from client ' + str(addr[0]) + ' : ' + str(addr[1])+"\n"
     print(time+message)
-    #log_file.write(time+message)
 
 
     #receives data(customer info) from the socket connected with the client.
@@ -52,7 +50,6 @@ def deal_with_customer(client_socket, addr):
     time = str(datetime.now())+"\n"
     message = 'received data(info of the customer) from client ' + str(addr[0]) + ' : ' + str(addr[1])+"\n"
     print(time+message)
-    #log_file.write(time+message)
 
 
     if (len(str(bank_account)) == 18):
@@ -76,22 +73,26 @@ def deal_with_customer(client_socket, addr):
                 time = str(datetime.now()) + "\n"
                 message = "Payment succeeded and send the result to the cleint <" + str(addr[0]) + ':' + str(addr[1]) + ">\n"
                 print(time + message)
-                #log_file.write(time + message)
-
 
             else:
+                if not result2:
+                    result2 = "SERVER ERROR FOR CHECKING YOUR INFO FROM BANK"
+
                 client_socket.send(str(result2).encode())
                 time = str(datetime.now()) + "\n"
                 message = "The client couldn't succeed to pay with this reason : " + str(result2) +"\n"
                 print(time + message)
-                #log_file.write(time + message)
+
 
         else:
+            if not result1:
+                result1 = "SERVER ERROR FOR CHECKING YOUR INFO FROM BANK"
+
             client_socket.send(str(result1).encode())
             time = str(datetime.now()) + "\n"
             message = "The client couldn't succeed to pay with this reason : " + str(result1) + "\n"
             print(time + message)
-            #log_file.write(time + message)
+
 
     #sends the result to the client.
     else:
@@ -100,7 +101,6 @@ def deal_with_customer(client_socket, addr):
         time = str(datetime.now()) + "\n"
         message = "The client couldn't succeed to pay with this reason : WRONG BANK ACCOUNT NUMBER\n"
         print(time + message)
-        #log_file.write(time + message)
 
 
 #Communication with the Node2
@@ -113,7 +113,6 @@ def call_node2(name, bankaccount, amount):
         time = str(datetime.now()) + "\n"
         message = "Node 2 connected\n"
         print(time + message)
-        #log_file.write(time + message)
 
 
         #forwards requests to the Node2.
@@ -122,18 +121,19 @@ def call_node2(name, bankaccount, amount):
         time = str(datetime.now()) + "\n"
         message = "Info sent to Node 2\n"
         print(time + message)
-        #log_file.write(time + message)
 
     except:
         return ("SERVER ERROR FOR CHECKING YOUR INFO FROM BANK\n")
 
+    # receive result from the Node3
     else:
         data = sock_for_N2.recv(1024).decode()
+        if not data:
+            return "SERVER ERROR FOR CHECKING YOUR INFO FROM BANK\n"
 
         time = str(datetime.now()) + "\n"
         message = data
-        print(time + message)
-        #log_file.write(time + message)
+        print(time + "Data received from Node 2 : " + message)
 
         return message
 
@@ -147,7 +147,6 @@ def call_node3(bankaccount):
         time = str(datetime.now()) + "\n"
         message = "Node 3 connected\n"
         print(time + message)
-        #log_file.write(time + message)
 
 
         #forwards requests to the Node3.
@@ -156,18 +155,19 @@ def call_node3(bankaccount):
         time = str(datetime.now()) + "\n"
         message = "Info sent to Node 3\n"
         print(time + message)
-        #log_file.write(time + message)
 
     except:
         return ("SERVER ERROR FOR CHECKING YOUR INFO FROM FRAUD DB\n")
 
+    #receive result from the Node3
     else:
         data = sock_for_N3.recv(1024).decode()
+        if not data:
+            return ("SERVER ERROR FOR CHECKING YOUR INFO FROM FRAUD DB\n")
 
-        time = str(datetime.now()) + "\n"
+        time = str(datetime.now) + "\n"
         message = data
-        print(time + message)
-        #log_file.write(time + message)
+        print(time + "Data received from Node 3 : " + message)
 
         return message
 
@@ -178,12 +178,10 @@ socket_for_clients = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket_for_clients.bind(('', 8001))
 socket_for_clients.listen()
 
-#log_file = open("log.log", 'a')
 
 time = str(datetime.now()) + "\n"
 message = 'Server started.\n'
 print(time + message)
-#log_file.write(time + message)
 
 
 #receives multiple clients with multithreads.
