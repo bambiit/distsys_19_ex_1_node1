@@ -1,3 +1,4 @@
+import sys
 import socket
 import threading
 from _datetime import datetime
@@ -107,7 +108,7 @@ def call_node2(name, bankaccount, amount):
     try:
         #connects with the Node2.
         sock_for_N2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock_for_N2.connect(("localhost", 8002))
+        sock_for_N2.connect((sys.argv[1], 8002))
 
         time = str(datetime.now()) + "\n"
         message = "Node 2 connected\n"
@@ -141,7 +142,7 @@ def call_node3(bankaccount):
     try:
         #connects with the Node3.
         sock_for_N3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock_for_N3.connect(("localhost", 8003))
+        sock_for_N3.connect((sys.argv[2], 8003))
 
         time = str(datetime.now()) + "\n"
         message = "Node 3 connected\n"
@@ -174,7 +175,7 @@ def call_node3(bankaccount):
 
 #creates a socket for connecting with clients.
 socket_for_clients = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket_for_clients.bind(("localhost", 8001))
+socket_for_clients.bind(('', 8001))
 socket_for_clients.listen()
 
 #log_file = open("log.log", 'a')
