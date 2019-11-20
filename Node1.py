@@ -58,8 +58,11 @@ def deal_with_customer(client_socket, addr):
         thread1 = thread_rv(target=call_node2, args=(name, bank_account, price, ))
         thread2 = thread_rv(target=call_node3, args=(bank_account,))
 
+        lock = threading.Lock()
+        lock.acquire()
         thread1.start()
         thread2.start()
+        lock.release()
 
         #Synchronization of threads. waits until both threads end.
         result1 = thread1.join()
@@ -71,7 +74,7 @@ def deal_with_customer(client_socket, addr):
             if (result2 == 'OK'):
                 client_socket.send("OK".encode())
                 time = str(datetime.now()) + "\n"
-                message = "Payment succeeded and send the result to the cleint <" + str(addr[0]) + ':' + str(addr[1]) + ">\n"
+                message = "Payment succeeded and the result sent to the cleint <" + str(addr[0]) + ':' + str(addr[1]) + ">\n"
                 print(time + message)
 
             else:
@@ -133,7 +136,7 @@ def call_node2(name, bankaccount, amount):
 
         time = str(datetime.now()) + "\n"
         message = data
-        print(time + "Data received from Node 2 : " + message)
+        print(time + "Data received from Node 2 : " + message + "\n")
 
         return message
 
@@ -143,6 +146,7 @@ def call_node3(bankaccount):
         #connects with the Node3.
         sock_for_N3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock_for_N3.connect((sys.argv[2], 8003))
+
 
         time = str(datetime.now()) + "\n"
         message = "Node 3 connected\n"
@@ -165,9 +169,9 @@ def call_node3(bankaccount):
         if not data:
             return ("SERVER ERROR FOR CHECKING YOUR INFO FROM FRAUD DB\n")
 
-        time = str(datetime.now) + "\n"
+        time = str(datetime.now()) + "\n"
         message = data
-        print(time + "Data received from Node 3 : " + message)
+        print(time + "Data received from Node 3 : " + message + "\n")
 
         return message
 
@@ -182,6 +186,7 @@ socket_for_clients.listen()
 time = str(datetime.now()) + "\n"
 message = 'Server started.\n'
 print(time + message)
+
 
 
 #receives multiple clients with multithreads.
